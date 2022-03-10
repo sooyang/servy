@@ -13,20 +13,21 @@ defmodule Servy.Handler do
       |> List.first
       |> String.split(" ")
 
-    conv = %{ method: method, path: path, resp_body: "" }
+    %{ method: method, path: path, resp_body: "" }
   end
 
-  def route(request) do
-    conv = %{ method: "GET", path: "/wildthings", resp_body: "Bears, Lions, Tigers" }
+  def route(conv) do
+
+    %{conv | resp_body: "Bears, Lions, Tigers"}
   end
 
   def format_response(conv) do
     """
     HTTP/1.1 200 OK
     Content-Type: text/html
-    Content-Length: 20
+    Content-Length: #{String.length(conv.resp_body)}
 
-    Bears, Lions, Tigers
+    #{conv.resp_body}
     """
   end
 end
