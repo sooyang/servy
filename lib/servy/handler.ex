@@ -4,6 +4,9 @@ defmodule Servy.Handler do
 
   @pages_path Path.expand("../../pages", __DIR__)
 
+  import Servy.Parser,only: [parse: 1]
+  import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
+
   @doc "Transforms the request into a response."
   def handle(request) do
     request
@@ -22,50 +25,6 @@ defmodule Servy.Handler do
   end
 
   def emojify(conv), do: conv
-
-  @doc "Logs 404 response"
-  def track(%{status: 404, path: path} = conv) do
-    IO.puts "Warning: #{path} is on the loose!"
-    conv
-  end
-
-  def track(conv), do: conv
-
-  def rewrite_path(%{path: "/wildlife"} = conv) do
-    %{ conv | path: "/wildthings"}
-  end
-
-  def rewrite_path(%{path: "/bears?id=" <> id} = conv) do
-    %{ conv | path: "/bears/#{id}"}
-  end
-
-  def rewrite_path(%{path: path} = conv) do
-    regex = ~r{\/(?<thing>\w+)\?id=(?<id>\d+)}
-    captures = Regex.named_captures(regex, path)
-    rewrite_path_captures(conv, captures)
-  end
-
-  def rewrite_path_captures(conv, %{"thing" => thing, "id" => id}) do
-    %{ conv | path: "/#{thing}/#{id}" }
-  end
-
-  def rewrite_path_captures(conv, nil), do: conv
-
-  def log(conv), do: IO.inspect conv
-
-  def parse(request) do
-    [method, path, _] =
-      request
-      |> String.split("\n")
-      |> List.first
-      |> String.split(" ")
-
-    %{ method: method,
-       path: path,
-       resp_body: "",
-       status: nil
-     }
-  end
 
   # def route(conv) do
   #   route(conv, conv.method, conv.path)
